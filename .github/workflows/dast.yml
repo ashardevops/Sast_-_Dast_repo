@@ -1,20 +1,26 @@
-name: DAST - OWASP ZAP Scan
+name: DAST Scan (ZAP)
 
 on:
-  push:
-    branches: ["main"]
+  workflow_run:
+    workflows: ["Deploy to EC2"]
+    types:
+      - completed
 
 jobs:
   dast:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Run ZAP Scan
-        run: |
-          docker run --rm -v $(pwd):/zap/wrk owasp/zap2docker-stable \
-          zap-baseline.py -t http://51.20.4.44 -r dast-report.html
+      - name: Wait for App
+        run: sleep 40
 
-      - name: Upload DAST Report (BOX)
+      - name: Run ZAP Scan on Live App
+        run: |
+          docker run --rm owasp/zap2docker-stable zap-baseline.py \
+          -t http://${{ secrets.EC2_HOST }} \
+          -r dast-report.html
+
+      - name: Upload Report
         uses: actions/upload-artifact@v4
         with:
           name: dast-report
