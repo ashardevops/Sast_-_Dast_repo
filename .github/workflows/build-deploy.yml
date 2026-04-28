@@ -1,4 +1,4 @@
-name: Build Push Deploy Pipeline
+name: Build Deploy Pipeline
 
 on:
   push:
@@ -13,15 +13,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
+      # 🔐 DockerHub Login
+      - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      # 🐳 Build Image
       - name: Build Docker Image
         run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/juice-shop:latest .
 
+      # 📤 Push Image
       - name: Push Docker Image
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/juice-shop:latest
 
@@ -35,7 +38,7 @@ jobs:
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/juice-shop:latest
