@@ -11,15 +11,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Wait for app
+      - name: Wait for app to be ready
         run: sleep 40
 
       - name: Run OWASP ZAP Scan
         run: |
-          docker run -t owasp/zap2docker-stable zap-baseline.py \
-          -t http://51.20.4.44 -r zap-report.html
+          docker run -t owasp/zap2docker-weekly zap-baseline.py \
+          -t http://${{ secrets.EC2_HOST }} -r zap-report.html
 
-      - name: Upload Report
+      - name: Upload ZAP Report
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
