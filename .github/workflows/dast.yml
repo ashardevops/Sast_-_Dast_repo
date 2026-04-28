@@ -1,0 +1,16 @@
+name: DAST Security Scan (OWASP ZAP)
+
+on:
+  workflow_run:
+    workflows: ["Build & Deploy Pipeline"]
+    types:
+      - completed
+
+jobs:
+  zap_scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run OWASP ZAP Scan
+        run: |
+          docker run -t owasp/zap2docker-stable zap-baseline.py \
+          -t http://51.20.4.44 -r zap-report.html
