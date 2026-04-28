@@ -16,7 +16,7 @@ jobs:
 
       - name: Run ZAP Scan on Live App
         run: |
-          docker run --rm owasp/zap2docker-stable zap-baseline.py \
+          docker run --rm ghcr.io/zaproxy/zaproxy:stable zap-baseline.py  \
           -t http://${{ secrets.EC2_HOST }} \
           -r dast-report.html
 
