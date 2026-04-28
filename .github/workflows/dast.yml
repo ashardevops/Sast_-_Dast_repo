@@ -1,25 +1,21 @@
-name: DAST Security Scan (ZAP)
+name: DAST - OWASP ZAP Scan
 
 on:
-  workflow_run:
-    workflows: ["Build Deploy Pipeline"]
-    types:
-      - completed
+  push:
+    branches: ["main"]
 
 jobs:
-  zap_scan:
+  dast:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Run ZAP Baseline Scan
+      - name: Run ZAP Scan
         run: |
-          docker pull zaproxy/zap-stable
-          docker run -t zaproxy/zap-stable zap-baseline.py \
-          -t http://${{ secrets.EC2_HOST }} \
-          -r zap-report.html
+          docker run --rm -v $(pwd):/zap/wrk owasp/zap2docker-stable \
+          zap-baseline.py -t http://51.20.4.44 -r dast-report.html
 
-      - name: Upload Report
+      - name: Upload DAST Report (BOX)
         uses: actions/upload-artifact@v4
         with:
-          name: zap-report
-          path: zap-report.html
+          name: dast-report
+          path: dast-report.html

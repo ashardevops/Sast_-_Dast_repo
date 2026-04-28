@@ -1,0 +1,24 @@
+name: Deploy to EC2
+
+on:
+  workflow_run:
+    workflows: ["Build & Push Docker Image"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/juice-shop:latest
+            docker stop juice-shop || true
+            docker rm juice-shop || true
+            docker run -d -p 80:3000 --name juice-shop ${{ secrets.DOCKERHUB_USERNAME }}/juice-shop:latest
